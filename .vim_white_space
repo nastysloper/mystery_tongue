@@ -1,0 +1,37 @@
+" FUNCTION - ShowWhiteSpace() {{{3
+  function! ShowWhiteSpace(flags)
+    let bad = ''
+    let pat = []
+    for c in split(a:flags, '\zs')
+      if c == 'e'
+        call add(pat, '\zs')
+      elseif c == 'i'
+        call add(pat, '\s\+$')
+      elseif c == 's'
+        call add(pat, '^\t*\zs \+')
+      elseif c == 't'
+        call add(pat, '[^\t]\zs\t\+')
+      else
+        let bad .=c
+      endif
+    endfor
+
+    if len(pat) > 1
+      let s = join(pat, '\|')
+      exec 'syntax match ExtraWhiteSpace "'.s.'" containedin=ALL'
+    else
+      syntax clear ExtraWhiteSpace
+    endif
+
+    if len(bad) > 1|echo 'ShowWhiteSpace ignored: '.bad|endif
+    endfunction
+
+  " FUNCTION - ToggleShowWhiteSpace {{{3
+  " I use this all the time. It's mapped to , ts
+  function! ToggleShowWhiteSpace()
+    if !exists('b:ws_show')|let b:ws_show = 1|endif
+    if !exists('b:ws_flags')|let b:ws_flags = 'est'|endif
+    let b:ws_show = !b:ws_show
+    if b:ws_show|call ShowWhiteSpace(b:ws_flags)|else|call ShowWhiteSpace('')|endif
+  endfunction
+
